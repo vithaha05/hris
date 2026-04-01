@@ -1,9 +1,51 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Card from "../components/Card";
 import Button from "../components/Button";
-import { todayTasks, leaveBalance, performanceData } from "../data/mockData";
+import Modal from "../components/Modal";
+import LeaveForm from "../components/LeaveForm";
+import LeaveBalanceCard from "../components/LeaveBalanceCard";
+import { todayTasks, leaveBalance as initialLeaveBalance, performanceData, currentUser } from "../data/mockData";
+import { LeaveRequestInput, LeaveRecord } from "../types";
 
 const EmployeeDashboard: React.FC = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [leaveRequests, setLeaveRequests] = useState<LeaveRecord[]>([
+    { 
+      id: "prev-1", 
+      name: currentUser.name, 
+      avatar: currentUser.avatar, 
+      type: "Annual Leave", 
+      startDate: "2026-03-10", 
+      endDate: "2026-03-12", 
+      status: "Approved" 
+    }
+  ]);
+  const [balance, setBalance] = useState(initialLeaveBalance);
+
+  const handleApplyLeave = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleFormSubmit = (data: LeaveRequestInput) => {
+    const newRequest: LeaveRecord = {
+      id: `lr-${Date.now()}`,
+      name: currentUser.name,
+      avatar: currentUser.avatar,
+      type: "Annual Leave",
+      startDate: data.startDate,
+      endDate: data.endDate,
+      status: "Pending"
+    };
+
+    setLeaveRequests([newRequest, ...leaveRequests]);
+    setIsModalOpen(false);
+    setShowToast(true);
+    
+    // Auto-hide toast after 3 seconds
+    setTimeout(() => setShowToast(false), 3000);
+  };
+
   return (
     <div className="container">
       <div className="grid gap-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
@@ -31,26 +73,12 @@ const EmployeeDashboard: React.FC = () => {
           <Button variant="secondary" size="sm" className="mt-4" style={{ width: '100%' }}>View All Tasks</Button>
         </Card>
 
-        {/* Leave Balance */}
-        <Card title="Leave Balance" icon="🏖️">
-          <div className="mt-4 flex items-center justify-between">
-            <div>
-              <span className="text-2xl font-bold">{leaveBalance.remaining}</span>
-              <span className="text-muted ml-1">Days</span>
-            </div>
-            <div className="text-right">
-              <div className="text-muted" style={{ fontSize: '12px' }}>Total: {leaveBalance.total}</div>
-              <div className="text-muted" style={{ fontSize: '12px' }}>Used: {leaveBalance.used}</div>
-            </div>
-          </div>
-          <div className="progress-container mt-4">
-            <div 
-              className="progress-bar" 
-              style={{ width: `${(leaveBalance.used / leaveBalance.total) * 100}%` }}
-            ></div>
-          </div>
-          <Button className="mt-4" style={{ width: '100%' }}>Apply Leave</Button>
-        </Card>
+        {/* Leave Balance Section */}
+        <LeaveBalanceCard 
+          remaining={balance.remaining} 
+          total={balance.total} 
+          onApplyLeave={handleApplyLeave} 
+        />
 
         {/* Payslip */}
         <Card title="Payslip" icon="💰">
@@ -80,6 +108,27 @@ const EmployeeDashboard: React.FC = () => {
           <Button variant="secondary" size="sm" className="mt-4" style={{ width: '100%' }}>Detailed Report</Button>
         </Card>
 
+        {/* Leave History (Optional but requested) */}
+        <Card title="Recent Leave Requests" icon="📋">
+          <div className="mt-4">
+            {leaveRequests.length === 0 ? (
+              <p className="text-muted" style={{ fontSize: '14px', textAlign: 'center', padding: '20px' }}>No leave requests yet.</p>
+            ) : (
+              leaveRequests.map(request => (
+                <div key={request.id} className="list-item">
+                  <div className="list-item__info">
+                    <p className="list-item__title">{request.type}</p>
+                    <p className="list-item__subtitle">{request.startDate} to {request.endDate}</p>
+                  </div>
+                  <span className={`badge ${request.status === 'Approved' ? 'badge-success' : 'badge-warning'}`}>
+                    {request.status}
+                  </span>
+                </div>
+              ))
+            )}
+          </div>
+        </Card>
+
         {/* Notifications */}
         <Card title="Notifications" icon="🔔">
           <div className="mt-4">
@@ -99,33 +148,26 @@ const EmployeeDashboard: React.FC = () => {
             </div>
           </div>
         </Card>
-
-        {/* Calendar */}
-        <Card title="Calendar" icon="🗓️">
-          <div className="mt-4">
-            <div className="flex gap-2" style={{ overflowX: 'auto', paddingBottom: '8px' }}>
-              {[1, 2, 3, 4, 5].map(day => (
-                <div key={day} className={`flex flex-col items-center justify-center`} style={{ 
-                  minWidth: '48px', 
-                  height: '64px', 
-                  borderRadius: '12px',
-                  backgroundColor: day === 2 ? 'var(--primary)' : 'var(--bg)',
-                  color: day === 2 ? 'white' : 'inherit',
-                  border: '1px solid var(--border)'
-                }}>
-                  <span style={{ fontSize: '12px' }}>Apr</span>
-                  <span style={{ fontSize: '18px', fontWeight: '700' }}>0{day}</span>
-                </div>
-              ))}
-            </div>
-            <div className="mt-4">
-              <p className="font-medium" style={{ fontSize: '14px' }}>Upcoming Event:</p>
-              <p className="text-muted" style={{ fontSize: '12px' }}>Design Workshop (2:00 PM)</p>
-            </div>
-          </div>
-        </Card>
-
       </div>
+
+      {/* Leave Application Modal */}
+      <Modal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        title="Apply for Leave"
+      >
+        <LeaveForm 
+          onSubmit={handleFormSubmit} 
+          onCancel={() => setIsModalOpen(false)} 
+        />
+      </Modal>
+
+      {/* Confirmation Toast */}
+      {showToast && (
+        <div className="toast">
+          <span>✅ Leave Request Submitted Successfully</span>
+        </div>
+      )}
     </div>
   );
 };

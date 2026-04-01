@@ -25,7 +25,7 @@ export interface LeaveRecord {
   type: string;
   startDate: string;
   endDate: string;
-  status: "Approved" | "Pending" | "On Leave";
+  status: "Approved" | "Pending" | "On Leave" | "Rejected";
 }
 
 export interface Activity {
@@ -54,4 +54,10 @@ export interface Alert {
   title: string;
   description: string;
   urgency: "high" | "medium" | "low";
+}
+
+export interface LeaveRequestInput {
+  startDate: string;
+  endDate: string;
+  reason: string;
 }
