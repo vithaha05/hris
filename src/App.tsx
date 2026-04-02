@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import "./index.css";
 import TopBar from "./components/TopBar";
 import EmployeeDashboard from "./dashboards/EmployeeDashboard";
 import ManagerDashboard from "./dashboards/ManagerDashboard";
 import HRDashboard from "./dashboards/HRDashboard";
 import { currentUser } from "./data/mockData";
-import { UserRole } from "./types";
+import type { UserRole } from "./types";
 
 function App() {
   const [activeRole, setActiveRole] = useState<UserRole>("Employee");

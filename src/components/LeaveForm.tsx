@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Button from "./Button";
-import { LeaveRequestInput } from "../types";
+import type { LeaveRequestInput } from "../types";
 
 interface LeaveFormProps {
   onSubmit: (data: LeaveRequestInput) => void;

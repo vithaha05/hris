@@ -1,5 +1,5 @@
 import React from "react";
-import { User, UserRole } from "../types";
+import type { User, UserRole } from "../types";
 
 interface TopBarProps {
   user: User;

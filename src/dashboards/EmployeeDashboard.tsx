@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Card from "../components/Card";
 import Button from "../components/Button";
 import Modal from "../components/Modal";
 import LeaveForm from "../components/LeaveForm";
 import LeaveBalanceCard from "../components/LeaveBalanceCard";
 import { todayTasks, leaveBalance as initialLeaveBalance, performanceData, currentUser } from "../data/mockData";
-import { LeaveRequestInput, LeaveRecord } from "../types";
+import type { LeaveRequestInput, LeaveRecord } from "../types";
 
 const EmployeeDashboard: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -21,7 +21,7 @@ const EmployeeDashboard: React.FC = () => {
       status: "Approved" 
     }
   ]);
-  const [balance, setBalance] = useState(initialLeaveBalance);
+  const [balance] = useState(initialLeaveBalance);
 
   const handleApplyLeave = () => {
     setIsModalOpen(true);
